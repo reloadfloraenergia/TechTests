@@ -488,7 +488,14 @@ O cache pode ser feito a guardar todo o corpo das respostas ou para guardar o re
 
 ``` 
 
-  
+
+## Armazene tudo no GitHub
+
+
+
+- Faça o push do projeto em um repositório público no GitHub
+
+- Não se esqueça de revisar se todos os arquivos subiram
 
   
 

@@ -1,7 +1,7 @@
 ## Introdução 
   
 
-Este é um teste para que possamos ver as suas habilidades como Back-end Developer. 
+Este é um teste para que possamos verificar as suas habilidades como desenvolvedor de software. 
 
   
 

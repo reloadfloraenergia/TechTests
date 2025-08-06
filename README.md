@@ -358,7 +358,7 @@ O cache pode ser feito para guardar todo o corpo das respostas ou para guardar o
 
 </details>
 
-### Front-End:
+### Front-End (Somente vaga Full-Stack):
 
 <details close>
 

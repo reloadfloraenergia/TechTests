@@ -338,7 +338,7 @@ O cache pode ser feito para guardar todo o corpo das respostas ou para guardar o
 
 - **Deploy em algum servidor**, com ou sem automatização do CI;
 
-- **Implementar um método de comunicação assíncrona para persistir palavras favoritas;
+- Implementar um método de comunicação assíncrona para persistir palavras favoritas;
 
 - **Implementar paginação com cursores** ao inves de usar page e limit . Ao realizar este diferencial, o retorno dos endpoints deve possuir a seguinte estrutura:
 

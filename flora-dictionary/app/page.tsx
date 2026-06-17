@@ -9,15 +9,6 @@ export default function HomePage() {
             <span className="text-[#5BFF5A]">✱</span>
             flora dictionary
           </Link>
-
-          <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="rounded-xl border border-white/40 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white hover:text-[#6A00F4]"
-            >
-              Login
-            </Link>
-          </div>
         </div>
       </header>
 

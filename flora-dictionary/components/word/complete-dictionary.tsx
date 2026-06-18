@@ -1,36 +1,72 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { BookOpen, ChevronLeft, ChevronRight, Search } from "lucide-react";
-import { WORDS } from "@/data/words";
-import { WordDetailsModal } from "@/components/word/word-details-modal";
+import { useEffect, useState } from "react";
+import { BookOpen, ChevronLeft, ChevronRight, Loader2, Search } from "lucide-react";
 import { useDebounce } from "@/hooks/use-debounce";
+import { getPaginatedWords } from "@/services/words-service";
+import { WordDetailsModal } from "@/components/word/word-details-modal";
 
 const ITEMS_PER_PAGE = 12;
 
 export function CompleteDictionary() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [words, setWords] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [selectedWord, setSelectedWord] = useState<string | null>(null);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
-  const cleanSearchTerm = debouncedSearchTerm.trim().toLowerCase();
 
-  const filteredWords = useMemo(() => {
-    if (!cleanSearchTerm) {
-      return WORDS;
+  useEffect(() => {
+    let isCurrentRequest = true;
+
+    async function loadWords() {
+      setIsLoading(true);
+      setError("");
+
+      try {
+        const data = await getPaginatedWords({
+          page: currentPage,
+          limit: ITEMS_PER_PAGE,
+          search: debouncedSearchTerm,
+        });
+
+        if (!isCurrentRequest) {
+          return;
+        }
+
+        setWords(data.words);
+        setTotalItems(data.totalItems);
+        setTotalPages(data.totalPages);
+
+        if (data.currentPage !== currentPage) {
+          setCurrentPage(data.currentPage);
+        }
+      } catch {
+        if (!isCurrentRequest) {
+          return;
+        }
+
+        setWords([]);
+        setTotalItems(0);
+        setTotalPages(1);
+        setError("Não foi possível carregar a lista de palavras.");
+      } finally {
+        if (isCurrentRequest) {
+          setIsLoading(false);
+        }
+      }
     }
 
-    return WORDS.filter((word) => word.toLowerCase().includes(cleanSearchTerm));
-  }, [cleanSearchTerm]);
+    loadWords();
 
-  const totalPages = Math.max(1, Math.ceil(filteredWords.length / ITEMS_PER_PAGE));
-
-  const paginatedWords = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-
-    return filteredWords.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [currentPage, filteredWords]);
+    return () => {
+      isCurrentRequest = false;
+    };
+  }, [currentPage, debouncedSearchTerm]);
 
   function handleSearchChange(event: React.ChangeEvent<HTMLInputElement>) {
     setSearchTerm(event.target.value);
@@ -87,7 +123,29 @@ export function CompleteDictionary() {
         </div>
       </div>
 
-      {!filteredWords.length ? (
+      {isLoading && (
+        <div className="flex min-h-[260px] flex-col items-center justify-center text-center">
+          <Loader2
+            className="animate-spin text-[#6A00F4] dark:text-[#5BFF5A]"
+            size={36}
+            aria-hidden="true"
+          />
+
+          <p className="mt-4 text-lg font-bold text-[#6A00F4] dark:text-[#5BFF5A]">
+            Carregando palavras...
+          </p>
+        </div>
+      )}
+
+      {!isLoading && error && (
+        <div className="flex min-h-[260px] flex-col items-center justify-center text-center">
+          <p className="text-lg font-bold text-red-600 dark:text-red-200">
+            {error}
+          </p>
+        </div>
+      )}
+
+      {!isLoading && !error && !totalItems && (
         <div className="flex min-h-[260px] flex-col items-center justify-center text-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#6A00F4]/10 text-[#6A00F4] dark:bg-[#5BFF5A]/10 dark:text-[#5BFF5A]">
             <Search size={28} aria-hidden="true" />
@@ -101,10 +159,12 @@ export function CompleteDictionary() {
             Tente buscar por outro termo ou limpe o filtro.
           </p>
         </div>
-      ) : (
+      )}
+
+      {!isLoading && !error && !!totalItems && (
         <>
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {paginatedWords.map((word) => (
+            {words.map((word) => (
               <button
                 key={word}
                 type="button"
@@ -127,7 +187,7 @@ export function CompleteDictionary() {
               <span className="font-black text-[#6A00F4] dark:text-[#5BFF5A]">
                 {totalPages}
               </span>{" "}
-              • {filteredWords.length} palavra(s)
+              • {totalItems} palavra(s)
             </p>
 
             <div className="flex gap-3">

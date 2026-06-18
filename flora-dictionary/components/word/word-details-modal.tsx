@@ -39,7 +39,6 @@ export function WordDetailsModal({
     }
 
     const selectedWord = word;
-
     let isCurrentRequest = true;
 
     async function loadWordDetails() {
@@ -149,6 +148,7 @@ export function WordDetailsModal({
             <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#6A00F4] dark:text-[#5BFF5A]">
               Detalhes
             </p>
+
             <h2 className="mt-1 text-2xl font-black text-[#6A00F4] dark:text-white">
               {word}
             </h2>

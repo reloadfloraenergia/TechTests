@@ -1,13 +1,47 @@
 import type { FavoriteWord } from "@/types/favorite";
 
-const FAVORITES_STORAGE_KEY = "flora_favorite_words";
+const FAVORITES_STORAGE_PREFIX = "flora_favorite_words";
+
+function getCurrentUserEmail() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const userRaw = localStorage.getItem("flora_user");
+
+  if (!userRaw) {
+    return null;
+  }
+
+  try {
+    const user = JSON.parse(userRaw) as { email?: string };
+
+    return user.email?.trim().toLowerCase() ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function normalizeStorageKey(value: string) {
+  return value.replace(/[^a-z0-9]/g, "_");
+}
+
+function getFavoritesStorageKey() {
+  const email = getCurrentUserEmail();
+
+  if (!email) {
+    return `${FAVORITES_STORAGE_PREFIX}_guest`;
+  }
+
+  return `${FAVORITES_STORAGE_PREFIX}_${normalizeStorageKey(email)}`;
+}
 
 export function getFavoriteWords(): FavoriteWord[] {
   if (typeof window === "undefined") {
     return [];
   }
 
-  const favoritesRaw = localStorage.getItem(FAVORITES_STORAGE_KEY);
+  const favoritesRaw = localStorage.getItem(getFavoritesStorageKey());
 
   if (!favoritesRaw) {
     return [];
@@ -21,7 +55,7 @@ export function getFavoriteWords(): FavoriteWord[] {
 }
 
 export function saveFavoriteWords(favorites: FavoriteWord[]) {
-  localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites));
+  localStorage.setItem(getFavoritesStorageKey(), JSON.stringify(favorites));
 }
 
 export function isFavoriteWord(word: string) {

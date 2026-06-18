@@ -2,7 +2,7 @@
 
 Aplicação web desenvolvida em **Next.js 15** para consulta de palavras em inglês, visualização de fonética, definições, exemplos, sinônimos, histórico de pesquisas e gerenciamento de palavras favoritas.
 
-O projeto foi desenvolvido como avaliação técnica front-end, com foco em experiência do usuário, componentização, TypeScript, App Router, boas práticas de organização, consumo de API externa e layout responsivo.
+O projeto foi desenvolvido como avaliação técnica front-end, com foco em experiência do usuário, componentização, TypeScript, App Router, boas práticas de organização, consumo de API externa, acessibilidade, testes básicos e layout responsivo.
 
 ## Funcionalidades implementadas
 
@@ -28,16 +28,21 @@ O projeto foi desenvolvido como avaliação técnica front-end, com foco em expe
 
   * listagem de todas as palavras favoritadas;
   * remoção direta de favoritos;
-  * link para abrir os detalhes da palavra.
+  * link para abrir os detalhes da palavra;
+  * exibição progressiva dos favoritos.
 * Dicionário completo com:
 
   * listagem paginada de palavras;
-  * filtro de palavras;
+  * filtro textual;
+  * filtro por letra do alfabeto;
+  * botão para limpar filtro;
   * modal de detalhes ao clicar em uma palavra.
 * Tema claro e escuro com `next-themes`.
+* Alternância manual entre tema light e dark.
 * Layout responsivo para desktop e mobile.
 * Estados de loading, erro e empty state nos principais fluxos.
-* Componentização de telas, cards, formulários, estados visuais e regras de armazenamento.
+* Componentização de telas, cards, formulários, estados visuais, filtros, paginação e regras de armazenamento.
+* Testes básicos de formulário e estado vazio com Vitest e React Testing Library.
 
 ## Stack utilizada
 
@@ -50,6 +55,11 @@ O projeto foi desenvolvido como avaliação técnica front-end, com foco em expe
 * Sonner
 * next-themes
 * Free Dictionary API
+* Vitest
+* React Testing Library
+* Testing Library user-event
+* Testing Library jest-dom
+* jsdom
 
 ## Estrutura principal do projeto
 
@@ -111,6 +121,14 @@ A aplicação foi desenvolvida com TypeScript, incluindo tipos específicos para
 * histórico de buscas;
 * usuários cadastrados;
 * respostas paginadas da listagem de palavras.
+
+### Tema light e dark
+
+O projeto possui suporte a **tema claro e escuro** utilizando `next-themes`.
+
+A alternância de tema é feita manualmente pelo usuário por meio de um botão flutuante na interface. O tema é aplicado por classe no HTML, permitindo estilização com Tailwind CSS usando variantes `dark`.
+
+Também foi utilizado `suppressHydrationWarning` no layout para evitar inconsistências de hidratação relacionadas ao tema e a extensões do navegador que podem injetar atributos no HTML.
 
 ### Autenticação e sessão
 
@@ -200,18 +218,62 @@ components/word/favorite-word-card.tsx
 components/word/favorites-empty-state.tsx
 components/word/complete-dictionary.tsx
 components/word/word-details-modal.tsx
+components/word/alphabet-filter.tsx
 ```
 
-Também foram criados componentes reutilizáveis para formulário, layout e dashboard:
+Também foram criados componentes reutilizáveis para formulário, layout, dashboard, busca e paginação:
 
 ```txt
 components/ui/form-field.tsx
 components/ui/form-error.tsx
 components/ui/submit-button.tsx
+components/ui/search-input.tsx
+components/ui/pagination-controls.tsx
 components/layout/auth-page-layout.tsx
 components/layout/page-header.tsx
 components/dashboard/dashboard-card.tsx
 ```
+
+### Acessibilidade
+
+Foram aplicadas boas práticas de acessibilidade, incluindo:
+
+* uso de HTML semântico;
+* `aria-label` em botões de ação;
+* `aria-current` na navegação ativa;
+* `role="dialog"` e `aria-modal` no modal de detalhes;
+* `aria-labelledby` no modal;
+* fechamento do modal com tecla `Esc`;
+* fechamento do modal ao clicar fora;
+* foco inicial no botão de fechar ao abrir o modal;
+* `aria-live` em estados de loading e erro;
+* botões com estados visuais de foco.
+
+### Performance
+
+Foram aplicadas melhorias de performance e experiência, incluindo:
+
+* busca com debounce;
+* uso de `useMemo` para dados derivados;
+* uso de `useCallback` em handlers reutilizados;
+* importação dinâmica do modal de detalhes;
+* separação de componentes para reduzir complexidade;
+* paginação da lista de palavras;
+* exibição progressiva da lista de favoritos.
+
+### Testes
+
+Foram adicionados testes básicos com **Vitest** e **React Testing Library**, cobrindo:
+
+* renderização do formulário de login;
+* validação de campos obrigatórios no login;
+* validação de e-mail não cadastrado;
+* redirecionamento após login válido;
+* renderização do formulário de cadastro;
+* validação de campos obrigatórios no cadastro;
+* validação de senha curta;
+* salvamento de usuário após cadastro válido;
+* estado vazio da página de favoritos.
 
 ## Rotas da aplicação
 
@@ -301,9 +363,37 @@ npm run lint
 
 Executa a análise de lint do projeto.
 
+```bash
+npm run test
+```
+
+Executa os testes em modo interativo.
+
+```bash
+npm run test -- --run
+```
+
+Executa os testes uma única vez.
+
+```bash
+npm run test:watch
+```
+
+Executa os testes em modo watch.
+
+```bash
+npm run test:coverage
+```
+
+Executa os testes com relatório de cobertura.
+
 ## Validação do projeto
 
 Os comandos abaixo foram executados com sucesso durante o desenvolvimento:
+
+```bash
+npm run test -- --run
+```
 
 ```bash
 npm run lint
@@ -313,7 +403,7 @@ npm run lint
 npm run build
 ```
 
-## Fluxo para testar
+## Fluxo para testar manualmente
 
 1. Acesse `/signup`.
 2. Crie uma conta com nome, e-mail e senha.
@@ -324,8 +414,12 @@ npm run build
 7. Favorite a palavra.
 8. Veja a palavra na página de favoritos.
 9. Volte ao dicionário e use a lista paginada.
-10. Clique em uma palavra da lista para abrir o modal de detalhes.
-11. Teste o logout.
+10. Use o filtro por texto.
+11. Use o filtro por letras do alfabeto.
+12. Clique em uma palavra da lista para abrir o modal de detalhes.
+13. Feche o modal pelo botão, pela tecla `Esc` ou clicando fora.
+14. Teste o tema claro e escuro.
+15. Teste o logout.
 
 ## Observações
 

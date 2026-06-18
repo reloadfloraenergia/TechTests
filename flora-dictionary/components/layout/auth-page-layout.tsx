@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 type AuthPageLayoutProps = {
-  badge: string;
   title: string;
   description: string;
   cardTitle: string;
@@ -13,7 +12,6 @@ type AuthPageLayoutProps = {
 };
 
 export function AuthPageLayout({
-  badge,
   title,
   description,
   cardTitle,
@@ -34,10 +32,6 @@ export function AuthPageLayout({
             <span className="text-[#5BFF5A]">✱</span>
             flora dictionary
           </Link>
-
-          <p className="mb-5 inline-flex rounded-full border border-[#6A00F4]/20 bg-[#6A00F4]/10 px-4 py-2 text-sm font-semibold text-[#6A00F4] dark:border-[#5BFF5A]/30 dark:bg-[#5BFF5A]/10 dark:text-[#5BFF5A]">
-            {badge}
-          </p>
 
           <h1 className="max-w-xl text-5xl font-extrabold tracking-tight text-[#6A00F4] sm:text-6xl">
             {title}

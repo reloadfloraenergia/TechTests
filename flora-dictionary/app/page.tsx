@@ -15,7 +15,7 @@ export default function HomePage() {
       <section className="mx-auto grid min-h-[calc(100vh-82px)] max-w-6xl items-center gap-12 px-6 py-16 lg:grid-cols-2">
         <div>
           <p className="mb-5 inline-flex rounded-full border border-[#6A00F4]/20 bg-[#6A00F4]/10 px-4 py-2 text-sm font-semibold text-[#6A00F4] dark:border-[#5BFF5A]/30 dark:bg-[#5BFF5A]/10 dark:text-[#5BFF5A]">
-            Flora Dictionary
+            Dicionário inteligente
           </p>
 
           <h1 className="max-w-xl text-5xl font-extrabold tracking-tight text-[#6A00F4] sm:text-6xl">
@@ -93,7 +93,7 @@ export default function HomePage() {
           </div>
 
           <div className="absolute -bottom-6 -left-6 hidden rounded-2xl bg-[#5BFF5A] px-6 py-4 font-bold text-[#6A00F4] shadow-xl md:block">
-            Busca com debounce
+            Busca rápida e inteligente
           </div>
         </div>
       </section>

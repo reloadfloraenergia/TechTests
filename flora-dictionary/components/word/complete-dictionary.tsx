@@ -1,15 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BookOpen, ChevronLeft, ChevronRight, Loader2, Search } from "lucide-react";
+import {
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  Search,
+  X,
+} from "lucide-react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { getPaginatedWords } from "@/services/words-service";
 import { WordDetailsModal } from "@/components/word/word-details-modal";
 
 const ITEMS_PER_PAGE = 12;
 
+const ALPHABET = "abcdefghijklmnopqrstuvwxyz".split("");
+
 export function CompleteDictionary() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedLetter, setSelectedLetter] = useState("");
   const [words, setWords] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -32,6 +42,7 @@ export function CompleteDictionary() {
           page: currentPage,
           limit: ITEMS_PER_PAGE,
           search: debouncedSearchTerm,
+          startsWith: selectedLetter,
         });
 
         if (!isCurrentRequest) {
@@ -66,10 +77,28 @@ export function CompleteDictionary() {
     return () => {
       isCurrentRequest = false;
     };
-  }, [currentPage, debouncedSearchTerm]);
+  }, [currentPage, debouncedSearchTerm, selectedLetter]);
 
   function handleSearchChange(event: React.ChangeEvent<HTMLInputElement>) {
     setSearchTerm(event.target.value);
+    setCurrentPage(1);
+  }
+
+  function handleClearSearch() {
+    setSearchTerm("");
+    setCurrentPage(1);
+  }
+
+  function handleSelectLetter(letter: string) {
+    setSelectedLetter((currentLetter) =>
+      currentLetter === letter ? "" : letter
+    );
+    setCurrentPage(1);
+  }
+
+  function handleClearFilters() {
+    setSearchTerm("");
+    setSelectedLetter("");
     setCurrentPage(1);
   }
 
@@ -80,6 +109,8 @@ export function CompleteDictionary() {
   function handleNextPage() {
     setCurrentPage((page) => Math.min(totalPages, page + 1));
   }
+
+  const hasActiveFilters = !!searchTerm || !!selectedLetter;
 
   return (
     <section className="mt-10 rounded-[2rem] border border-[#6A00F4]/10 bg-white p-6 shadow-lg dark:border-white/10 dark:bg-[#1F0A3D]">
@@ -95,8 +126,8 @@ export function CompleteDictionary() {
           </h2>
 
           <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-600 dark:text-zinc-300">
-            Navegue pela lista, filtre termos e clique em uma palavra para abrir
-            os detalhes em um modal.
+            Navegue pela lista, filtre por termo ou escolha uma letra para abrir
+            rapidamente os detalhes de uma palavra.
           </p>
         </div>
 
@@ -119,7 +150,60 @@ export function CompleteDictionary() {
               placeholder="Filtrar por palavra..."
               className="w-full bg-transparent text-zinc-950 outline-none placeholder:text-zinc-400 dark:text-white"
             />
+
+            {!!searchTerm && (
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-zinc-400 transition hover:bg-zinc-100 hover:text-[#6A00F4] dark:hover:bg-white/10 dark:hover:text-[#5BFF5A]"
+                aria-label="Limpar filtro de palavra"
+                title="Limpar filtro"
+              >
+                <X size={17} aria-hidden="true" />
+              </button>
+            )}
           </div>
+        </div>
+      </div>
+
+      <div className="mt-5 border-b border-zinc-200 pb-5 dark:border-white/10">
+        <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm font-bold text-zinc-700 dark:text-zinc-200">
+            Filtrar por letra
+          </p>
+
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={handleClearFilters}
+              className="text-left text-xs font-bold text-zinc-500 transition hover:text-[#6A00F4] dark:text-zinc-400 dark:hover:text-[#5BFF5A] sm:text-right"
+            >
+              Limpar filtros
+            </button>
+          )}
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {ALPHABET.map((letter) => {
+            const isSelected = selectedLetter === letter;
+
+            return (
+              <button
+                key={letter}
+                type="button"
+                onClick={() => handleSelectLetter(letter)}
+                className={`flex h-9 min-w-9 items-center justify-center rounded-xl px-3 text-sm font-black uppercase transition ${
+                  isSelected
+                    ? "bg-[#6A00F4] text-white dark:bg-[#5BFF5A] dark:text-[#6A00F4]"
+                    : "border border-[#6A00F4]/10 bg-zinc-50 text-[#6A00F4] hover:bg-[#6A00F4] hover:text-white dark:border-white/10 dark:bg-[#13002E] dark:text-[#5BFF5A] dark:hover:bg-[#5BFF5A] dark:hover:text-[#6A00F4]"
+                }`}
+                aria-pressed={isSelected}
+                aria-label={`Filtrar palavras pela letra ${letter.toUpperCase()}`}
+              >
+                {letter}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -156,7 +240,7 @@ export function CompleteDictionary() {
           </p>
 
           <p className="mt-2 max-w-md text-sm leading-6 text-zinc-500 dark:text-zinc-400">
-            Tente buscar por outro termo ou limpe o filtro.
+            Tente buscar por outro termo ou limpe os filtros.
           </p>
         </div>
       )}
@@ -188,6 +272,15 @@ export function CompleteDictionary() {
                 {totalPages}
               </span>{" "}
               • {totalItems} palavra(s)
+              {selectedLetter && (
+                <>
+                  {" "}
+                  com a letra{" "}
+                  <span className="font-black uppercase text-[#6A00F4] dark:text-[#5BFF5A]">
+                    {selectedLetter}
+                  </span>
+                </>
+              )}
             </p>
 
             <div className="flex gap-3">

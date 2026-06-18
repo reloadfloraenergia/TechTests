@@ -4,6 +4,7 @@ type GetPaginatedWordsParams = {
   page?: number;
   limit?: number;
   search?: string;
+  startsWith?: string;
 };
 
 export type PaginatedWordsResponse = {
@@ -22,15 +23,23 @@ export async function getPaginatedWords({
   page = 1,
   limit = 12,
   search = "",
+  startsWith = "",
 }: GetPaginatedWordsParams): Promise<PaginatedWordsResponse> {
   const cleanSearch = normalizeWord(search);
+  const cleanStartsWith = normalizeWord(startsWith);
 
   const filteredWords = WORDS.filter((word) => {
-    if (!cleanSearch) {
-      return true;
-    }
+    const normalizedWord = word.toLowerCase();
 
-    return word.toLowerCase().includes(cleanSearch);
+    const matchesSearch = cleanSearch
+      ? normalizedWord.includes(cleanSearch)
+      : true;
+
+    const matchesInitialLetter = cleanStartsWith
+      ? normalizedWord.startsWith(cleanStartsWith)
+      : true;
+
+    return matchesSearch && matchesInitialLetter;
   });
 
   const totalItems = filteredWords.length;

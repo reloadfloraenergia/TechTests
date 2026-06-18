@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { X } from "lucide-react";
 import type { DictionaryEntry } from "@/types/dictionary";
 import { fetchWordDetails } from "@/services/dictionary-service";
@@ -24,6 +24,8 @@ export function WordDetailsModal({
   isOpen,
   onClose,
 }: WordDetailsModalProps) {
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+
   const [entry, setEntry] = useState<DictionaryEntry | null>(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -84,6 +86,8 @@ export function WordDetailsModal({
       return;
     }
 
+    closeButtonRef.current?.focus();
+
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         onClose();
@@ -140,24 +144,32 @@ export function WordDetailsModal({
       className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 px-4 py-8 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
-      aria-label={`Detalhes da palavra ${word}`}
+      aria-labelledby="word-details-modal-title"
+      onClick={onClose}
     >
-      <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[2rem] border border-white/10 bg-white p-6 shadow-2xl dark:bg-[#1F0A3D]">
+      <div
+        className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[2rem] border border-white/10 bg-white p-6 shadow-2xl dark:bg-[#1F0A3D]"
+        onClick={(event) => event.stopPropagation()}
+      >
         <div className="mb-5 flex items-center justify-between gap-4 border-b border-zinc-200 pb-4 dark:border-white/10">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#6A00F4] dark:text-[#5BFF5A]">
               Detalhes
             </p>
 
-            <h2 className="mt-1 text-2xl font-black text-[#6A00F4] dark:text-white">
+            <h2
+              id="word-details-modal-title"
+              className="mt-1 text-2xl font-black text-[#6A00F4] dark:text-white"
+            >
               {word}
             </h2>
           </div>
 
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={onClose}
-            className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#6A00F4]/20 text-[#6A00F4] transition hover:bg-[#6A00F4]/10 dark:border-white/20 dark:text-white dark:hover:bg-white/10"
+            className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#6A00F4]/20 text-[#6A00F4] transition hover:bg-[#6A00F4]/10 focus:outline-none focus:ring-4 focus:ring-[#6A00F4]/20 dark:border-white/20 dark:text-white dark:hover:bg-white/10 dark:focus:ring-[#5BFF5A]/20"
             aria-label="Fechar modal"
             title="Fechar"
           >

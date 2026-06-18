@@ -125,7 +125,7 @@ export function AppShell({ children }: AppShellProps) {
             <button
               type="button"
               onClick={handleLogout}
-              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#6A00F4]/20 text-[#6A00F4] transition hover:bg-[#6A00F4]/10 dark:border-white/20 dark:text-white dark:hover:bg-white/10 lg:hidden"
+              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#6A00F4]/20 text-[#6A00F4] transition hover:bg-[#6A00F4]/10 focus:outline-none focus:ring-4 focus:ring-[#6A00F4]/20 dark:border-white/20 dark:text-white dark:hover:bg-white/10 dark:focus:ring-[#5BFF5A]/20 lg:hidden"
               aria-label="Sair"
               title="Sair"
             >
@@ -133,7 +133,7 @@ export function AppShell({ children }: AppShellProps) {
             </button>
           </div>
 
-          <nav className="flex flex-wrap gap-3">
+          <nav aria-label="Navegação principal" className="flex flex-wrap gap-3">
             {navigation.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
@@ -142,7 +142,8 @@ export function AppShell({ children }: AppShellProps) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition ${
+                  aria-current={isActive ? "page" : undefined}
+                  className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition focus:outline-none focus:ring-4 focus:ring-[#6A00F4]/20 dark:focus:ring-[#5BFF5A]/20 ${
                     isActive
                       ? "bg-[#6A00F4] text-white dark:bg-[#5BFF5A] dark:text-[#6A00F4]"
                       : "bg-[#6A00F4]/10 text-[#6A00F4] hover:bg-[#6A00F4] hover:text-white dark:bg-white/10 dark:text-white dark:hover:bg-[#5BFF5A] dark:hover:text-[#6A00F4]"
@@ -160,6 +161,7 @@ export function AppShell({ children }: AppShellProps) {
               <p className="text-sm font-bold text-[#6A00F4] dark:text-[#5BFF5A]">
                 {user.name}
               </p>
+
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
                 {user.email}
               </p>
@@ -168,7 +170,7 @@ export function AppShell({ children }: AppShellProps) {
             <button
               type="button"
               onClick={handleLogout}
-              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#6A00F4]/20 text-[#6A00F4] transition hover:bg-[#6A00F4]/10 dark:border-white/20 dark:text-white dark:hover:bg-white/10"
+              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#6A00F4]/20 text-[#6A00F4] transition hover:bg-[#6A00F4]/10 focus:outline-none focus:ring-4 focus:ring-[#6A00F4]/20 dark:border-white/20 dark:text-white dark:hover:bg-white/10 dark:focus:ring-[#5BFF5A]/20"
               aria-label="Sair"
               title="Sair"
             >

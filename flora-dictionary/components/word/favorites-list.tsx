@@ -57,15 +57,16 @@ export function FavoritesList() {
 
   return (
     <section>
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {visibleFavorites.map((favorite) => (
-          <FavoriteWordCard
-            key={favorite.word}
-            favorite={favorite}
-            onRemove={handleRemoveFavorite}
-          />
+          <li key={favorite.word}>
+            <FavoriteWordCard
+              favorite={favorite}
+              onRemove={handleRemoveFavorite}
+            />
+          </li>
         ))}
-      </div>
+      </ul>
 
       {(hasMoreFavorites || isShowingMoreThanInitial) && (
         <div className="mt-8 flex flex-col items-center justify-center gap-3">
@@ -83,7 +84,7 @@ export function FavoritesList() {
             <button
               type="button"
               onClick={handleShowLessFavorites}
-              className="text-sm font-bold text-zinc-500 transition hover:text-[#6A00F4] dark:text-zinc-400 dark:hover:text-[#5BFF5A]"
+              className="text-sm font-bold text-zinc-500 transition hover:text-[#6A00F4] focus:outline-none focus:ring-4 focus:ring-[#6A00F4]/20 dark:text-zinc-400 dark:hover:text-[#5BFF5A] dark:focus:ring-[#5BFF5A]/20"
             >
               Mostrar menos
             </button>

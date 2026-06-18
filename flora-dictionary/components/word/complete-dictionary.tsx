@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import { useCallback, useEffect, useState } from "react";
 import {
   BookOpen,
   ChevronLeft,
@@ -11,10 +12,19 @@ import {
 } from "lucide-react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { getPaginatedWords } from "@/services/words-service";
-import { WordDetailsModal } from "@/components/word/word-details-modal";
+
+const WordDetailsModal = dynamic(
+  () =>
+    import("@/components/word/word-details-modal").then(
+      (mod) => mod.WordDetailsModal
+    ),
+  {
+    ssr: false,
+    loading: () => null,
+  }
+);
 
 const ITEMS_PER_PAGE = 12;
-
 const ALPHABET = "abcdefghijklmnopqrstuvwxyz".split("");
 
 export function CompleteDictionary() {
@@ -84,31 +94,31 @@ export function CompleteDictionary() {
     setCurrentPage(1);
   }
 
-  function handleClearSearch() {
+  const handleClearSearch = useCallback(() => {
     setSearchTerm("");
     setCurrentPage(1);
-  }
+  }, []);
 
-  function handleSelectLetter(letter: string) {
+  const handleSelectLetter = useCallback((letter: string) => {
     setSelectedLetter((currentLetter) =>
       currentLetter === letter ? "" : letter
     );
     setCurrentPage(1);
-  }
+  }, []);
 
-  function handleClearFilters() {
+  const handleClearFilters = useCallback(() => {
     setSearchTerm("");
     setSelectedLetter("");
     setCurrentPage(1);
-  }
+  }, []);
 
-  function handlePreviousPage() {
+  const handlePreviousPage = useCallback(() => {
     setCurrentPage((page) => Math.max(1, page - 1));
-  }
+  }, []);
 
-  function handleNextPage() {
+  const handleNextPage = useCallback(() => {
     setCurrentPage((page) => Math.min(totalPages, page + 1));
-  }
+  }, [totalPages]);
 
   const hasActiveFilters = !!searchTerm || !!selectedLetter;
 
@@ -155,7 +165,7 @@ export function CompleteDictionary() {
               <button
                 type="button"
                 onClick={handleClearSearch}
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-zinc-400 transition hover:bg-zinc-100 hover:text-[#6A00F4] dark:hover:bg-white/10 dark:hover:text-[#5BFF5A]"
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-zinc-400 transition hover:bg-zinc-100 hover:text-[#6A00F4] focus:outline-none focus:ring-4 focus:ring-[#6A00F4]/20 dark:hover:bg-white/10 dark:hover:text-[#5BFF5A] dark:focus:ring-[#5BFF5A]/20"
                 aria-label="Limpar filtro de palavra"
                 title="Limpar filtro"
               >
@@ -176,7 +186,7 @@ export function CompleteDictionary() {
             <button
               type="button"
               onClick={handleClearFilters}
-              className="text-left text-xs font-bold text-zinc-500 transition hover:text-[#6A00F4] dark:text-zinc-400 dark:hover:text-[#5BFF5A] sm:text-right"
+              className="text-left text-xs font-bold text-zinc-500 transition hover:text-[#6A00F4] focus:outline-none focus:ring-4 focus:ring-[#6A00F4]/20 dark:text-zinc-400 dark:hover:text-[#5BFF5A] dark:focus:ring-[#5BFF5A]/20 sm:text-right"
             >
               Limpar filtros
             </button>
@@ -192,7 +202,7 @@ export function CompleteDictionary() {
                 key={letter}
                 type="button"
                 onClick={() => handleSelectLetter(letter)}
-                className={`flex h-9 min-w-9 items-center justify-center rounded-xl px-3 text-sm font-black uppercase transition ${
+                className={`flex h-9 min-w-9 items-center justify-center rounded-xl px-3 text-sm font-black uppercase transition focus:outline-none focus:ring-4 focus:ring-[#6A00F4]/20 dark:focus:ring-[#5BFF5A]/20 ${
                   isSelected
                     ? "bg-[#6A00F4] text-white dark:bg-[#5BFF5A] dark:text-[#6A00F4]"
                     : "border border-[#6A00F4]/10 bg-zinc-50 text-[#6A00F4] hover:bg-[#6A00F4] hover:text-white dark:border-white/10 dark:bg-[#13002E] dark:text-[#5BFF5A] dark:hover:bg-[#5BFF5A] dark:hover:text-[#6A00F4]"
@@ -208,7 +218,11 @@ export function CompleteDictionary() {
       </div>
 
       {isLoading && (
-        <div className="flex min-h-[260px] flex-col items-center justify-center text-center">
+        <div
+          role="status"
+          aria-live="polite"
+          className="flex min-h-[260px] flex-col items-center justify-center text-center"
+        >
           <Loader2
             className="animate-spin text-[#6A00F4] dark:text-[#5BFF5A]"
             size={36}
@@ -222,7 +236,11 @@ export function CompleteDictionary() {
       )}
 
       {!isLoading && error && (
-        <div className="flex min-h-[260px] flex-col items-center justify-center text-center">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="flex min-h-[260px] flex-col items-center justify-center text-center"
+        >
           <p className="text-lg font-bold text-red-600 dark:text-red-200">
             {error}
           </p>
@@ -253,7 +271,7 @@ export function CompleteDictionary() {
                 key={word}
                 type="button"
                 onClick={() => setSelectedWord(word)}
-                className="rounded-2xl border border-[#6A00F4]/10 bg-zinc-50 px-4 py-4 text-left font-bold text-[#6A00F4] transition hover:-translate-y-0.5 hover:border-[#6A00F4]/30 hover:bg-[#6A00F4] hover:text-white dark:border-white/10 dark:bg-[#13002E] dark:text-[#5BFF5A] dark:hover:bg-[#5BFF5A] dark:hover:text-[#6A00F4]"
+                className="rounded-2xl border border-[#6A00F4]/10 bg-zinc-50 px-4 py-4 text-left font-bold text-[#6A00F4] transition hover:-translate-y-0.5 hover:border-[#6A00F4]/30 hover:bg-[#6A00F4] hover:text-white focus:outline-none focus:ring-4 focus:ring-[#6A00F4]/20 dark:border-white/10 dark:bg-[#13002E] dark:text-[#5BFF5A] dark:hover:bg-[#5BFF5A] dark:hover:text-[#6A00F4] dark:focus:ring-[#5BFF5A]/20"
                 aria-label={`Abrir detalhes da palavra ${word}`}
               >
                 {word}
@@ -288,7 +306,7 @@ export function CompleteDictionary() {
                 type="button"
                 onClick={handlePreviousPage}
                 disabled={currentPage === 1}
-                className="inline-flex items-center gap-2 rounded-xl border border-[#6A00F4]/20 px-4 py-2 text-sm font-bold text-[#6A00F4] transition hover:bg-[#6A00F4]/10 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/20 dark:text-white dark:hover:bg-white/10"
+                className="inline-flex items-center gap-2 rounded-xl border border-[#6A00F4]/20 px-4 py-2 text-sm font-bold text-[#6A00F4] transition hover:bg-[#6A00F4]/10 focus:outline-none focus:ring-4 focus:ring-[#6A00F4]/20 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/20 dark:text-white dark:hover:bg-white/10 dark:focus:ring-[#5BFF5A]/20"
               >
                 <ChevronLeft size={18} aria-hidden="true" />
                 Anterior
@@ -298,7 +316,7 @@ export function CompleteDictionary() {
                 type="button"
                 onClick={handleNextPage}
                 disabled={currentPage === totalPages}
-                className="inline-flex items-center gap-2 rounded-xl bg-[#5BFF5A] px-4 py-2 text-sm font-bold text-[#6A00F4] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#5BFF5A] px-4 py-2 text-sm font-bold text-[#6A00F4] transition hover:brightness-95 focus:outline-none focus:ring-4 focus:ring-[#5BFF5A]/40 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Próxima
                 <ChevronRight size={18} aria-hidden="true" />

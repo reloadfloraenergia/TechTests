@@ -1,18 +1,19 @@
 # Flora Dictionary
 
-Aplicação web desenvolvida em **Next.js** para consulta de palavras em inglês, visualização de fonética, definições, exemplos, sinônimos, histórico de pesquisas e gerenciamento de favoritos.
+Aplicação web desenvolvida em **Next.js 15** para consulta de palavras em inglês, visualização de fonética, definições, exemplos, sinônimos, histórico de pesquisas e gerenciamento de palavras favoritas.
 
-O projeto foi desenvolvido como avaliação técnica front-end, com foco em organização de componentes, uso de TypeScript, App Router, autenticação simulada, consumo de API externa e experiência responsiva.
+O projeto foi desenvolvido como avaliação técnica front-end, com foco em experiência do usuário, componentização, TypeScript, App Router, boas práticas de organização, consumo de API externa e layout responsivo.
 
 ## Funcionalidades implementadas
 
 * Cadastro de usuário com validação client-side.
-* Login com validação de campos.
+* Login com validação de campos, feedback de erro e redirecionamento após autenticação.
 * Criação de token simulado via cookie HTTP-only.
-* Logout com remoção do cookie e redirecionamento para login.
+* Logout com remoção do cookie e redirecionamento para a tela de login.
 * Proteção visual das rotas internas.
 * Dashboard com acesso ao dicionário, favoritos e histórico.
 * Busca de palavras em inglês com debounce.
+* Histórico de pesquisas recentes por usuário.
 * Consulta de detalhes da palavra usando API externa.
 * Exibição de:
 
@@ -22,9 +23,12 @@ O projeto foi desenvolvido como avaliação técnica front-end, com foco em orga
   * definições;
   * exemplos;
   * sinônimos.
-* Histórico de pesquisas recentes por usuário.
-* Favoritar e desfavoritar palavras.
-* Página de favoritos com remoção direta e link para detalhes.
+* Botão para favoritar e desfavoritar palavras com feedback visual.
+* Página de favoritos com:
+
+  * listagem de todas as palavras favoritadas;
+  * remoção direta de favoritos;
+  * link para abrir os detalhes da palavra.
 * Dicionário completo com:
 
   * listagem paginada de palavras;
@@ -32,7 +36,8 @@ O projeto foi desenvolvido como avaliação técnica front-end, com foco em orga
   * modal de detalhes ao clicar em uma palavra.
 * Tema claro e escuro com `next-themes`.
 * Layout responsivo para desktop e mobile.
-* Componentização de telas, cards, formulários e estados visuais.
+* Estados de loading, erro e empty state nos principais fluxos.
+* Componentização de telas, cards, formulários, estados visuais e regras de armazenamento.
 
 ## Stack utilizada
 
@@ -91,9 +96,11 @@ types/
 
 ## Principais decisões técnicas
 
-### App Router
+### Next.js App Router
 
 O projeto utiliza o **App Router** do Next.js, mantendo as páginas dentro da pasta `app/`.
+
+As páginas são mantidas como Server Components sempre que possível, enquanto componentes com interação, estado, acesso ao `localStorage`, eventos de clique ou hooks de navegação utilizam `"use client"`.
 
 ### TypeScript
 
@@ -102,13 +109,14 @@ A aplicação foi desenvolvida com TypeScript, incluindo tipos específicos para
 * entradas do dicionário;
 * favoritos;
 * histórico de buscas;
-* usuários cadastrados.
+* usuários cadastrados;
+* respostas paginadas da listagem de palavras.
 
-### Autenticação simulada
+### Autenticação e sessão
 
-A autenticação foi implementada de forma simulada para fins de avaliação técnica.
+A autenticação foi implementada de forma simulada para fins de avaliação técnica front-end.
 
-O cadastro de usuários é salvo no `localStorage`, enquanto o login chama uma rota interna:
+O cadastro de usuários é salvo no `localStorage`. No login, a aplicação chama uma rota interna:
 
 ```txt
 POST /api/auth/login
@@ -126,7 +134,9 @@ O logout chama:
 POST /api/auth/logout
 ```
 
-E remove o cookie da sessão.
+E remove o cookie da sessão, além de redirecionar o usuário para a tela de login.
+
+Em um ambiente real, essa estrutura poderia ser integrada a um backend com geração de JWT real, persistência de usuários e validação de credenciais no servidor.
 
 ### Armazenamento por usuário
 
@@ -172,7 +182,7 @@ CompleteDictionary
     -> GET /api/words?page=1&limit=12&search=energy
 ```
 
-## Componentização
+### Componentização
 
 O projeto foi organizado para separar responsabilidades entre telas, componentes visuais, services e helpers.
 
@@ -192,7 +202,7 @@ components/word/complete-dictionary.tsx
 components/word/word-details-modal.tsx
 ```
 
-Também foram criados componentes reutilizáveis para formulário e layout:
+Também foram criados componentes reutilizáveis para formulário, layout e dashboard:
 
 ```txt
 components/ui/form-field.tsx
@@ -291,6 +301,18 @@ npm run lint
 
 Executa a análise de lint do projeto.
 
+## Validação do projeto
+
+Os comandos abaixo foram executados com sucesso durante o desenvolvimento:
+
+```bash
+npm run lint
+```
+
+```bash
+npm run build
+```
+
 ## Fluxo para testar
 
 1. Acesse `/signup`.
@@ -307,6 +329,6 @@ Executa a análise de lint do projeto.
 
 ## Observações
 
-Este projeto utiliza autenticação simulada e armazenamento local para fins de avaliação técnica. Em um ambiente real, o cadastro, login, favoritos e histórico seriam persistidos em uma API/backend com banco de dados.
+Este projeto utiliza autenticação simulada e armazenamento local para fins de avaliação técnica front-end. Em um ambiente real, o cadastro, login, favoritos e histórico seriam persistidos em uma API/backend com banco de dados.
 
 A estrutura atual foi pensada para facilitar essa evolução, mantendo regras de dados em `services` e `lib`, e a interface organizada em componentes reutilizáveis.

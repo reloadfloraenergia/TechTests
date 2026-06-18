@@ -62,7 +62,29 @@ export function SignupForm() {
       email,
     };
 
-    localStorage.setItem("flora_registered_user", JSON.stringify(user));
+    const storedUsersRaw = localStorage.getItem("flora_registered_users");
+    const storedUsers = storedUsersRaw
+      ? (JSON.parse(storedUsersRaw) as Array<{ name: string; email: string }>)
+      : [];
+
+    const userAlreadyExists = storedUsers.some(
+      (storedUser) => storedUser.email.toLowerCase() === email
+    );
+
+    if (userAlreadyExists) {
+      setError("Já existe uma conta cadastrada com este e-mail.");
+      return;
+    }
+
+    const updatedUsers = [...storedUsers, user];
+
+    localStorage.setItem("flora_registered_users", JSON.stringify(updatedUsers));
+
+    toast.success("Conta criada com sucesso! Faça login para continuar.");
+
+    setTimeout(() => {
+      router.push("/login");
+    }, 1200);
 
     toast.success("Conta criada com sucesso! Faça login para continuar.");
 

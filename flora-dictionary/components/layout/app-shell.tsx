@@ -40,11 +40,10 @@ export function AppShell({ children }: AppShellProps) {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("flora_token");
     const storedUser = localStorage.getItem("flora_user");
 
-    if (!token || !storedUser) {
-      router.replace("/login");
+    if (!storedUser) {
+      router.push("/login");
       return;
     }
 
@@ -52,11 +51,15 @@ export function AppShell({ children }: AppShellProps) {
     setIsCheckingAuth(false);
   }, [router]);
 
-  function handleLogout() {
-    localStorage.removeItem("flora_user");
-    localStorage.removeItem("flora_token");
-    router.push("/login");
-  }
+  async function handleLogout() {
+  await fetch("/api/auth/logout", {
+    method: "POST",
+  });
+
+  localStorage.removeItem("flora_user");
+
+  router.push("/login");
+}
 
   if (isCheckingAuth) {
     return (

@@ -32,7 +32,7 @@ export function LoginForm() {
     }
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const email = form.email.trim().toLowerCase();
@@ -53,27 +53,51 @@ export function LoginForm() {
       return;
     }
 
-    const registeredUserRaw = localStorage.getItem("flora_registered_user");
+    const registeredUsersRaw = localStorage.getItem("flora_registered_users");
 
-    if (!registeredUserRaw) {
+    if (!registeredUsersRaw) {
       setError("Nenhuma conta encontrada. Crie uma conta antes de entrar.");
       return;
     }
 
-    const registeredUser = JSON.parse(registeredUserRaw) as {
+    const registeredUsers = JSON.parse(registeredUsersRaw) as Array<{
       name: string;
       email: string;
-    };
+    }>;
 
-    if (registeredUser.email !== email) {
+    const registeredUser = registeredUsers.find(
+      (user) => user.email.toLowerCase() === email
+    );
+
+    if (!registeredUser) {
       setError("E-mail não encontrado. Verifique os dados ou crie uma conta.");
       return;
     }
 
-    localStorage.setItem("flora_user", JSON.stringify(registeredUser));
-    localStorage.setItem("flora_token", "fake-jwt-token");
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    router.push("/dashboard");
+      const data = (await response.json()) as {
+        message?: string;
+      };
+
+      if (!response.ok) {
+        setError(data.message ?? "Não foi possível realizar o login.");
+        return;
+      }
+
+      localStorage.setItem("flora_user", JSON.stringify(registeredUser));
+
+      router.push("/dashboard");
+    } catch {
+      setError("Erro de conexão. Tente novamente em instantes.");
+    }
   }
 
   return (

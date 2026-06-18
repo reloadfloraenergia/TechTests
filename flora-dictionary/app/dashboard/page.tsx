@@ -55,7 +55,10 @@ export default function DashboardPage() {
             </p>
           </Link>
 
-          <div className="rounded-3xl border border-[#6A00F4]/10 bg-[#6A00F4] p-6 text-white shadow-lg dark:border-white/10">
+          <Link
+            href="/dictionary"
+            className="group rounded-3xl border border-[#6A00F4]/10 bg-[#6A00F4] p-6 text-white shadow-lg transition hover:-translate-y-1 hover:shadow-xl dark:border-white/10"
+          >
             <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-[#5BFF5A]">
               <Clock size={24} />
             </div>
@@ -65,7 +68,7 @@ export default function DashboardPage() {
             <p className="mt-3 text-sm leading-6 text-white/80">
               Veja as últimas palavras pesquisadas durante seus estudos.
             </p>
-          </div>
+          </Link>
         </div>
       </div>
     </AppShell>

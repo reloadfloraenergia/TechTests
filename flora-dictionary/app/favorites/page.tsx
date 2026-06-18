@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/layout/app-shell";
+import { FavoritesList } from "@/components/word/favorites-list";
 
 export default function FavoritesPage() {
   return (
@@ -12,9 +13,13 @@ export default function FavoritesPage() {
           Palavras favoritas
         </h1>
 
-        <p className="mt-4 max-w-2xl text-lg text-zinc-700 dark:text-zinc-200">
-          Próximo passo: vamos listar aqui as palavras salvas pelo usuário.
+        <p className="mt-4 max-w-2xl text-lg leading-8 text-zinc-700 dark:text-zinc-200">
+          Acesse rapidamente os termos que você salvou durante suas pesquisas.
         </p>
+
+        <div className="mt-8">
+          <FavoritesList />
+        </div>
       </div>
     </AppShell>
   );

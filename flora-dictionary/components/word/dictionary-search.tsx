@@ -1,18 +1,23 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Search, Star, Volume2, AlertCircle, Loader2 } from "lucide-react";
+import { Search, Star, StarOff, Volume2, AlertCircle, Loader2 } from "lucide-react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { fetchWordDetails } from "@/services/dictionary-service";
 import type { DictionaryEntry } from "@/types/dictionary";
+import { addFavoriteWord, isFavoriteWord, removeFavoriteWord } from "@/lib/favorites-storage";
+import { useSearchParams } from "next/navigation";
 
 const INITIAL_WORD = "";
 
 export function DictionarySearch() {
-  const [searchTerm, setSearchTerm] = useState(INITIAL_WORD);
+  const searchParams = useSearchParams();
+  const initialWordFromUrl = searchParams.get("word") ?? INITIAL_WORD;
+  const [searchTerm, setSearchTerm] = useState(initialWordFromUrl);
   const [entry, setEntry] = useState<DictionaryEntry | null>(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);                                
 
   const debouncedSearchTerm = useDebounce(searchTerm, 600);
 
@@ -68,6 +73,15 @@ export function DictionarySearch() {
     };
   }, [cleanSearchTerm]);
 
+  useEffect(() => {
+    if (!entry?.word) {
+      setIsFavorite(false);
+      return;
+    }
+
+    setIsFavorite(isFavoriteWord(entry.word));
+  }, [entry]);
+
   function handlePlayAudio() {
     if (!audioUrl) {
       return;
@@ -76,6 +90,26 @@ export function DictionarySearch() {
     const audio = new Audio(audioUrl);
     audio.play();
   }
+
+  function handleToggleFavorite() {
+  if (!entry) {
+    return;
+  }
+
+  if (isFavorite) {
+    removeFavoriteWord(entry.word);
+    setIsFavorite(false);
+    return;
+  }
+
+  addFavoriteWord({
+    word: entry.word,
+    phonetic: entry.phonetic ?? entry.phonetics?.[0]?.text,
+    addedAt: new Date().toISOString(),
+  });
+
+  setIsFavorite(true);
+}
 
   return (
     <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,360px)_1fr]">
@@ -177,11 +211,22 @@ export function DictionarySearch() {
 
                 <button
                   type="button"
-                  className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#5BFF5A] text-[#6A00F4] transition hover:brightness-95"
-                  aria-label="Adicionar aos favoritos"
-                  title="Adicionar aos favoritos"
+                  onClick={handleToggleFavorite}
+                  className={`flex h-12 w-12 items-center justify-center rounded-2xl transition hover:brightness-95 ${
+                    isFavorite
+                      ? "bg-[#6A00F4] text-white dark:bg-[#5BFF5A] dark:text-[#6A00F4]"
+                      : "bg-[#5BFF5A] text-[#6A00F4]"
+                  }`}
+                  aria-label={
+                    isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"
+                  }
+                  title={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
                 >
-                  <Star size={21} aria-hidden="true" />
+                  {isFavorite ? (
+                    <StarOff size={21} aria-hidden="true" />
+                  ) : (
+                    <Star size={21} aria-hidden="true" />
+                  )}
                 </button>
               </div>
             </div>

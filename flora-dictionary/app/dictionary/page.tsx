@@ -1,5 +1,6 @@
 import { AppShell } from "@/components/layout/app-shell";
 import { DictionarySearch } from "@/components/word/dictionary-search";
+import { Suspense } from "react";
 
 export default function DictionaryPage() {
   return (
@@ -19,7 +20,17 @@ export default function DictionaryPage() {
         </p>
 
         <div className="mt-8">
-          <DictionarySearch />
+          <Suspense
+            fallback={
+              <div className="rounded-[2rem] border border-[#6A00F4]/10 bg-white p-8 text-center shadow-lg dark:border-white/10 dark:bg-[#1F0A3D]">
+                <p className="font-bold text-[#6A00F4] dark:text-[#5BFF5A]">
+                  Carregando dicionário...
+                </p>
+              </div>
+            }
+          >
+            <DictionarySearch />
+          </Suspense>
         </div>
       </div>
     </AppShell>

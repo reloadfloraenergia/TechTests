@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  findRegisteredUserByEmail,
+  setCurrentUser,
+} from "@/lib/auth-storage";
 
 type FormState = {
   email: string;
@@ -18,6 +22,7 @@ export function LoginForm() {
 
   const [form, setForm] = useState<FormState>(INITIAL_FORM_STATE);
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = event.target;
@@ -53,26 +58,14 @@ export function LoginForm() {
       return;
     }
 
-    const registeredUsersRaw = localStorage.getItem("flora_registered_users");
-
-    if (!registeredUsersRaw) {
-      setError("Nenhuma conta encontrada. Crie uma conta antes de entrar.");
-      return;
-    }
-
-    const registeredUsers = JSON.parse(registeredUsersRaw) as Array<{
-      name: string;
-      email: string;
-    }>;
-
-    const registeredUser = registeredUsers.find(
-      (user) => user.email.toLowerCase() === email
-    );
+    const registeredUser = findRegisteredUserByEmail(email);
 
     if (!registeredUser) {
       setError("E-mail não encontrado. Verifique os dados ou crie uma conta.");
       return;
     }
+
+    setIsSubmitting(true);
 
     try {
       const response = await fetch("/api/auth/login", {
@@ -89,14 +82,16 @@ export function LoginForm() {
 
       if (!response.ok) {
         setError(data.message ?? "Não foi possível realizar o login.");
+        setIsSubmitting(false);
         return;
       }
 
-      localStorage.setItem("flora_user", JSON.stringify(registeredUser));
+      setCurrentUser(registeredUser);
 
       router.push("/dashboard");
     } catch {
       setError("Erro de conexão. Tente novamente em instantes.");
+      setIsSubmitting(false);
     }
   }
 
@@ -118,6 +113,7 @@ export function LoginForm() {
         >
           E-mail
         </label>
+
         <input
           id="email"
           name="email"
@@ -125,6 +121,7 @@ export function LoginForm() {
           value={form.email}
           onChange={handleChange}
           placeholder="voce@email.com"
+          autoComplete="email"
           className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-[#6A00F4] focus:ring-4 focus:ring-[#6A00F4]/10 dark:border-white/10 dark:bg-[#13002E] dark:text-white dark:focus:border-[#5BFF5A] dark:focus:ring-[#5BFF5A]/10"
         />
       </div>
@@ -136,6 +133,7 @@ export function LoginForm() {
         >
           Senha
         </label>
+
         <input
           id="password"
           name="password"
@@ -143,15 +141,17 @@ export function LoginForm() {
           value={form.password}
           onChange={handleChange}
           placeholder="Digite sua senha"
+          autoComplete="current-password"
           className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-[#6A00F4] focus:ring-4 focus:ring-[#6A00F4]/10 dark:border-white/10 dark:bg-[#13002E] dark:text-white dark:focus:border-[#5BFF5A] dark:focus:ring-[#5BFF5A]/10"
         />
       </div>
 
       <button
         type="submit"
-        className="w-full rounded-xl bg-[#5BFF5A] px-6 py-4 text-lg font-bold text-[#6A00F4] transition hover:brightness-95 focus:outline-none focus:ring-4 focus:ring-[#5BFF5A]/40"
+        disabled={isSubmitting}
+        className="w-full rounded-xl bg-[#5BFF5A] px-6 py-4 text-lg font-bold text-[#6A00F4] transition hover:brightness-95 focus:outline-none focus:ring-4 focus:ring-[#5BFF5A]/40 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        Entrar
+        {isSubmitting ? "Entrando..." : "Entrar"}
       </button>
     </form>
   );

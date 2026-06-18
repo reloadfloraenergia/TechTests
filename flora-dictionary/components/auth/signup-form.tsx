@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { createRegisteredUser } from "@/lib/auth-storage";
 
 type FormState = {
   name: string;
@@ -21,6 +22,7 @@ export function SignupForm() {
 
   const [form, setForm] = useState<FormState>(INITIAL_FORM_STATE);
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = event.target;
@@ -57,36 +59,22 @@ export function SignupForm() {
       return;
     }
 
-    const user = {
+    setIsSubmitting(true);
+
+    const result = createRegisteredUser({
       name,
       email,
-    };
+    });
 
-    const storedUsersRaw = localStorage.getItem("flora_registered_users");
-    const storedUsers = storedUsersRaw
-      ? (JSON.parse(storedUsersRaw) as Array<{ name: string; email: string }>)
-      : [];
-
-    const userAlreadyExists = storedUsers.some(
-      (storedUser) => storedUser.email.toLowerCase() === email
-    );
-
-    if (userAlreadyExists) {
-      setError("Já existe uma conta cadastrada com este e-mail.");
+    if (!result.success) {
+      setError(result.message);
+      setIsSubmitting(false);
       return;
     }
 
-    const updatedUsers = [...storedUsers, user];
-
-    localStorage.setItem("flora_registered_users", JSON.stringify(updatedUsers));
-
     toast.success("Conta criada com sucesso! Faça login para continuar.");
 
-    setTimeout(() => {
-      router.push("/login");
-    }, 1200);
-
-    toast.success("Conta criada com sucesso! Faça login para continuar.");
+    setForm(INITIAL_FORM_STATE);
 
     setTimeout(() => {
       router.push("/login");
@@ -111,6 +99,7 @@ export function SignupForm() {
         >
           Nome
         </label>
+
         <input
           id="name"
           name="name"
@@ -118,6 +107,7 @@ export function SignupForm() {
           value={form.name}
           onChange={handleChange}
           placeholder="Seu nome"
+          autoComplete="name"
           className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-[#6A00F4] focus:ring-4 focus:ring-[#6A00F4]/10 dark:border-white/10 dark:bg-[#13002E] dark:text-white dark:focus:border-[#5BFF5A] dark:focus:ring-[#5BFF5A]/10"
         />
       </div>
@@ -129,6 +119,7 @@ export function SignupForm() {
         >
           E-mail
         </label>
+
         <input
           id="email"
           name="email"
@@ -136,6 +127,7 @@ export function SignupForm() {
           value={form.email}
           onChange={handleChange}
           placeholder="voce@email.com"
+          autoComplete="email"
           className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-[#6A00F4] focus:ring-4 focus:ring-[#6A00F4]/10 dark:border-white/10 dark:bg-[#13002E] dark:text-white dark:focus:border-[#5BFF5A] dark:focus:ring-[#5BFF5A]/10"
         />
       </div>
@@ -147,6 +139,7 @@ export function SignupForm() {
         >
           Senha
         </label>
+
         <input
           id="password"
           name="password"
@@ -154,15 +147,17 @@ export function SignupForm() {
           value={form.password}
           onChange={handleChange}
           placeholder="Crie uma senha"
+          autoComplete="new-password"
           className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-[#6A00F4] focus:ring-4 focus:ring-[#6A00F4]/10 dark:border-white/10 dark:bg-[#13002E] dark:text-white dark:focus:border-[#5BFF5A] dark:focus:ring-[#5BFF5A]/10"
         />
       </div>
 
       <button
         type="submit"
-        className="w-full rounded-xl bg-[#5BFF5A] px-6 py-4 text-lg font-bold text-[#6A00F4] transition hover:brightness-95 focus:outline-none focus:ring-4 focus:ring-[#5BFF5A]/40"
+        disabled={isSubmitting}
+        className="w-full rounded-xl bg-[#5BFF5A] px-6 py-4 text-lg font-bold text-[#6A00F4] transition hover:brightness-95 focus:outline-none focus:ring-4 focus:ring-[#5BFF5A]/40 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        Criar minha conta
+        {isSubmitting ? "Criando conta..." : "Criar minha conta"}
       </button>
     </form>
   );

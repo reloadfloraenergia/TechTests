@@ -34,7 +34,9 @@ export function DictionarySearch() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
-  const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([]);
+  const [recentSearches, setRecentSearches] = useState<RecentSearch[]>(() =>
+    getRecentSearches()
+  );
 
   const debouncedSearchTerm = useDebounce(searchTerm, 600);
   const cleanSearchTerm = debouncedSearchTerm.trim().toLowerCase();
@@ -44,13 +46,7 @@ export function DictionarySearch() {
   }, [entry]);
 
   useEffect(() => {
-    setRecentSearches(getRecentSearches());
-  }, []);
-
-  useEffect(() => {
     if (!cleanSearchTerm) {
-      setEntry(null);
-      setError("");
       return;
     }
 
@@ -68,6 +64,7 @@ export function DictionarySearch() {
         }
 
         setEntry(data);
+        setIsFavorite(isFavoriteWord(data.word));
         setRecentSearches(addRecentSearch(data.word));
       } catch (err) {
         if (!isCurrentRequest) {
@@ -75,6 +72,7 @@ export function DictionarySearch() {
         }
 
         setEntry(null);
+        setIsFavorite(false);
         setError(
           err instanceof Error
             ? err.message
@@ -94,14 +92,18 @@ export function DictionarySearch() {
     };
   }, [cleanSearchTerm]);
 
-  useEffect(() => {
-    if (!entry?.word) {
-      setIsFavorite(false);
-      return;
-    }
+  function handleSearchChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const value = event.target.value;
 
-    setIsFavorite(isFavoriteWord(entry.word));
-  }, [entry]);
+    setSearchTerm(value);
+
+    if (!value.trim()) {
+      setEntry(null);
+      setError("");
+      setIsLoading(false);
+      setIsFavorite(false);
+    }
+  }
 
   function handlePlayAudio() {
     if (!audioUrl) {
@@ -160,7 +162,7 @@ export function DictionarySearch() {
             id="word-search"
             type="search"
             value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
+            onChange={handleSearchChange}
             placeholder="Ex: energy, clean, future..."
             className="w-full bg-transparent text-zinc-950 outline-none placeholder:text-zinc-400 dark:text-white"
           />
@@ -178,9 +180,11 @@ export function DictionarySearch() {
 
         {!isLoading && error && <WordErrorState message={error} />}
 
-        {!isLoading && !error && !entry && <WordEmptyState />}
+        {!isLoading && !error && (!entry || !cleanSearchTerm) && (
+          <WordEmptyState />
+        )}
 
-        {!isLoading && !error && entry && (
+        {!isLoading && !error && entry && cleanSearchTerm && (
           <WordDetailsCard
             entry={entry}
             audioUrl={audioUrl}

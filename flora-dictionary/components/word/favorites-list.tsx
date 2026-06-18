@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { FavoriteWord } from "@/types/favorite";
 import {
   getFavoriteWords,
@@ -10,11 +10,9 @@ import { FavoriteWordCard } from "@/components/word/favorite-word-card";
 import { FavoritesEmptyState } from "@/components/word/favorites-empty-state";
 
 export function FavoritesList() {
-  const [favorites, setFavorites] = useState<FavoriteWord[]>([]);
-
-  useEffect(() => {
-    setFavorites(getFavoriteWords());
-  }, []);
+  const [favorites, setFavorites] = useState<FavoriteWord[]>(() =>
+    getFavoriteWords()
+  );
 
   function handleRemoveFavorite(word: string) {
     const updatedFavorites = removeFavoriteWord(word);

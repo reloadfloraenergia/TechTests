@@ -1,36 +1,312 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Flora Dictionary
 
-## Getting Started
+Aplicação web desenvolvida em **Next.js** para consulta de palavras em inglês, visualização de fonética, definições, exemplos, sinônimos, histórico de pesquisas e gerenciamento de favoritos.
 
-First, run the development server:
+O projeto foi desenvolvido como avaliação técnica front-end, com foco em organização de componentes, uso de TypeScript, App Router, autenticação simulada, consumo de API externa e experiência responsiva.
+
+## Funcionalidades implementadas
+
+* Cadastro de usuário com validação client-side.
+* Login com validação de campos.
+* Criação de token simulado via cookie HTTP-only.
+* Logout com remoção do cookie e redirecionamento para login.
+* Proteção visual das rotas internas.
+* Dashboard com acesso ao dicionário, favoritos e histórico.
+* Busca de palavras em inglês com debounce.
+* Consulta de detalhes da palavra usando API externa.
+* Exibição de:
+
+  * palavra;
+  * fonética;
+  * áudio de pronúncia, quando disponível;
+  * definições;
+  * exemplos;
+  * sinônimos.
+* Histórico de pesquisas recentes por usuário.
+* Favoritar e desfavoritar palavras.
+* Página de favoritos com remoção direta e link para detalhes.
+* Dicionário completo com:
+
+  * listagem paginada de palavras;
+  * filtro de palavras;
+  * modal de detalhes ao clicar em uma palavra.
+* Tema claro e escuro com `next-themes`.
+* Layout responsivo para desktop e mobile.
+* Componentização de telas, cards, formulários e estados visuais.
+
+## Stack utilizada
+
+* [Next.js](https://nextjs.org/) 15
+* React
+* TypeScript
+* Tailwind CSS
+* App Router
+* Lucide React
+* Sonner
+* next-themes
+* Free Dictionary API
+
+## Estrutura principal do projeto
+
+```txt
+app/
+  api/
+    auth/
+      login/
+      logout/
+  dashboard/
+  dictionary/
+  favorites/
+  login/
+  signup/
+
+components/
+  auth/
+  dashboard/
+  layout/
+  providers/
+  ui/
+  word/
+
+data/
+  words.ts
+
+hooks/
+  use-debounce.ts
+
+lib/
+  auth-storage.ts
+  favorites-storage.ts
+  recent-searches-storage.ts
+
+services/
+  dictionary-service.ts
+  words-service.ts
+
+types/
+  dictionary.ts
+  favorite.ts
+  recent-search.ts
+```
+
+## Principais decisões técnicas
+
+### App Router
+
+O projeto utiliza o **App Router** do Next.js, mantendo as páginas dentro da pasta `app/`.
+
+### TypeScript
+
+A aplicação foi desenvolvida com TypeScript, incluindo tipos específicos para:
+
+* entradas do dicionário;
+* favoritos;
+* histórico de buscas;
+* usuários cadastrados.
+
+### Autenticação simulada
+
+A autenticação foi implementada de forma simulada para fins de avaliação técnica.
+
+O cadastro de usuários é salvo no `localStorage`, enquanto o login chama uma rota interna:
+
+```txt
+POST /api/auth/login
+```
+
+Essa rota cria um cookie HTTP-only chamado:
+
+```txt
+flora_token
+```
+
+O logout chama:
+
+```txt
+POST /api/auth/logout
+```
+
+E remove o cookie da sessão.
+
+### Armazenamento por usuário
+
+Favoritos e histórico de buscas são armazenados no `localStorage`, com chave separada por usuário autenticado. Isso evita que favoritos e histórico de um usuário apareçam para outro.
+
+### Consumo da API externa
+
+Os detalhes das palavras são buscados por meio da Free Dictionary API:
+
+```txt
+https://api.dictionaryapi.dev/api/v2/entries/en/{word}
+```
+
+A API pública utilizada fornece detalhes por palavra, mas não disponibiliza um endpoint oficial para listagem completa e paginada de todas as palavras.
+
+Por isso, a listagem do dicionário completo foi implementada com uma base local em:
+
+```txt
+data/words.ts
+```
+
+Essa base é acessada por meio de uma camada de service:
+
+```txt
+services/words-service.ts
+```
+
+Dessa forma, a aplicação fica preparada para trocar a fonte local por uma API real no futuro, sem alterar o componente de interface.
+
+Hoje a estrutura funciona assim:
+
+```txt
+CompleteDictionary
+  -> getPaginatedWords()
+    -> data/words.ts
+```
+
+Em uma API real, bastaria alterar o service para algo como:
+
+```txt
+CompleteDictionary
+  -> getPaginatedWords()
+    -> GET /api/words?page=1&limit=12&search=energy
+```
+
+## Componentização
+
+O projeto foi organizado para separar responsabilidades entre telas, componentes visuais, services e helpers.
+
+Exemplos de componentes criados:
+
+```txt
+components/word/dictionary-search.tsx
+components/word/recent-searches-card.tsx
+components/word/word-details-card.tsx
+components/word/word-loading-state.tsx
+components/word/word-error-state.tsx
+components/word/word-empty-state.tsx
+components/word/favorites-list.tsx
+components/word/favorite-word-card.tsx
+components/word/favorites-empty-state.tsx
+components/word/complete-dictionary.tsx
+components/word/word-details-modal.tsx
+```
+
+Também foram criados componentes reutilizáveis para formulário e layout:
+
+```txt
+components/ui/form-field.tsx
+components/ui/form-error.tsx
+components/ui/submit-button.tsx
+components/layout/auth-page-layout.tsx
+components/layout/page-header.tsx
+components/dashboard/dashboard-card.tsx
+```
+
+## Rotas da aplicação
+
+```txt
+/             Página inicial
+/signup       Cadastro
+/login        Login
+/dashboard    Painel logado
+/dictionary   Busca e dicionário completo
+/favorites    Palavras favoritas
+```
+
+## Como instalar e executar o projeto
+
+### 1. Clonar o repositório
+
+```bash
+git clone <URL_DO_REPOSITORIO>
+```
+
+### 2. Entrar na pasta do projeto
+
+```bash
+cd flora-dictionary
+```
+
+Caso o projeto esteja dentro de uma subpasta, entre na pasta onde está o `package.json`.
+
+### 3. Instalar dependências
+
+```bash
+npm install
+```
+
+### 4. Configurar variáveis de ambiente
+
+No estado atual do projeto, **não há variáveis de ambiente obrigatórias** para executar a aplicação localmente.
+
+Mesmo assim, caso queira manter um arquivo de ambiente para evolução futura, crie:
+
+```bash
+touch .env.local
+```
+
+Exemplo de `.env.local`:
+
+```env
+# Atualmente não há variáveis obrigatórias.
+# A API pública do dicionário é consumida diretamente pelo service.
+```
+
+### 5. Executar em ambiente de desenvolvimento
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+A aplicação ficará disponível em:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```txt
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts disponíveis
 
-## Learn More
+```bash
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Executa o projeto em modo de desenvolvimento.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Gera a versão de produção.
 
-## Deploy on Vercel
+```bash
+npm run start
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Executa a versão de produção após o build.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run lint
+```
+
+Executa a análise de lint do projeto.
+
+## Fluxo para testar
+
+1. Acesse `/signup`.
+2. Crie uma conta com nome, e-mail e senha.
+3. Faça login em `/login`.
+4. Acesse o dashboard.
+5. Entre no dicionário.
+6. Pesquise uma palavra em inglês.
+7. Favorite a palavra.
+8. Veja a palavra na página de favoritos.
+9. Volte ao dicionário e use a lista paginada.
+10. Clique em uma palavra da lista para abrir o modal de detalhes.
+11. Teste o logout.
+
+## Observações
+
+Este projeto utiliza autenticação simulada e armazenamento local para fins de avaliação técnica. Em um ambiente real, o cadastro, login, favoritos e histórico seriam persistidos em uma API/backend com banco de dados.
+
+A estrutura atual foi pensada para facilitar essa evolução, mantendo regras de dados em `services` e `lib`, e a interface organizada em componentes reutilizáveis.

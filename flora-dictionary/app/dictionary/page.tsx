@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/layout/app-shell";
+import { DictionarySearch } from "@/components/word/dictionary-search";
 
 export default function DictionaryPage() {
   return (
@@ -12,9 +13,14 @@ export default function DictionaryPage() {
           Buscar palavras
         </h1>
 
-        <p className="mt-4 max-w-2xl text-lg text-zinc-700 dark:text-zinc-200">
-          Próximo passo: vamos criar a busca com debounce e detalhes da palavra.
+        <p className="mt-4 max-w-2xl text-lg leading-8 text-zinc-700 dark:text-zinc-200">
+          Pesquise uma palavra em inglês para visualizar fonética, definições,
+          exemplos e sinônimos.
         </p>
+
+        <div className="mt-8">
+          <DictionarySearch />
+        </div>
       </div>
     </AppShell>
   );
